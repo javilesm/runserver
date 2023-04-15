@@ -1,11 +1,14 @@
 @echo off
+set Config_Path=C:\Users\jorge\.ssh\config
+for /f "usebackq tokens=1,2 delims= " %%i in ("%Config_Path%") do (
+  if "%%i"=="HostName" set HostName=%%j
+  if "%%i"=="User" set User=%%j
+  if "%%i"=="IdentityFile" set IdentityFile=%%j
+)
 
-set HostName=ec2-3-220-58-75.compute-1.amazonaws.com
-set User=ubuntu
-set IdentityFile=C:\Users\jorge\.ssh\samava.pem
-set local_file_path=C:\Users\jorge\.ssh\getscripts.sh
-set server_file_path=/home/%User%/getscripts.sh
-
+echo HostName: %HostName%
+echo User: %User%
+echo IdentityFile: %IdentityFile%
 echo HostName: %HostName%
 echo User: %User%
 echo Ejecutando la copia del archivo al servidor...
