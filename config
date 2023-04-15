@@ -1,0 +1,5 @@
+Host AWS-EC2
+    HostName ec2-3-220-58-75.compute-1.amazonaws.com
+    User ubuntu
+    IdentityFile C:\Users\jorge\.ssh\samava.pem
+
