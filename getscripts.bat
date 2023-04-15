@@ -1,4 +1,7 @@
 @echo off
+
+set server_file_path=/home/%server_user%/getscripts.sh
+set local_file_path=C:\Users\jorge\.ssh\getscripts.sh
 set Config_Path=C:\Users\jorge\.ssh\config
 for /f "usebackq tokens=1,2 delims= " %%i in ("%Config_Path%") do (
   if "%%i"=="HostName" set HostName=%%j
@@ -6,8 +9,6 @@ for /f "usebackq tokens=1,2 delims= " %%i in ("%Config_Path%") do (
   if "%%i"=="IdentityFile" set IdentityFile=%%j
 )
 
-echo HostName: %HostName%
-echo User: %User%
 echo IdentityFile: %IdentityFile%
 echo HostName: %HostName%
 echo User: %User%
