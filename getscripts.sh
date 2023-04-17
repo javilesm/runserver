@@ -15,10 +15,14 @@ sleep 2
 if [ -d $path ]; then
   echo "El directorio de destino ya existe. Realizando actualización..."
   cd $path
+  chown "$USER:$USER" "$path"
   git pull $git_url
 else
-  echo "Clonando el repositorio..."
+  echo "Creando directorio de destino"
+  mkdir $path 
+  chown "$USER:$USER" "$path"
   git clone $git_url $path
+  echo "Clonando el repositorio..."
 fi
 
 # Eliminar la extensión ".sh" de los archivos copiados
@@ -43,9 +47,3 @@ echo "************************"
 echo "**********END***********"
 echo "************************"
 exit 1
-
-# Actualiza la sesión de tu terminal ejecutando source en el archivo de perfil de shell 
-source ~/.bashrc
-
-echo "El contenido del repositorio $git_url se ha copiado correctamente a $path con permisos de ejecución."
-exit 0
