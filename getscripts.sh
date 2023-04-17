@@ -14,13 +14,14 @@ sleep 2
 # Verificar si el directorio de destino ya existe
 if [ -d $path ]; then
   echo "El directorio de destino ya existe. Realizando actualización..."
-  cd $path
   chown "$USER:$USER" "$path"
+  cd $path
   git pull $git_url
 else
   echo "Creando directorio de destino"
   mkdir $path 
   chown "$USER:$USER" "$path"
+  cd $path
   git clone $git_url $path
   echo "Clonando el repositorio..."
 fi
