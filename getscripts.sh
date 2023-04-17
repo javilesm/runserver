@@ -4,22 +4,22 @@
 # Variables de autenticación de GitHub
 username="javilesm" # usuario
 path="/home/ubuntu/scripts/" # Directorio final
-git_path="/home/ubuntu/git/" # Directorio de destino para clonar el repositorio
 git_url="https://github.com/$username/scripts.git" # URL del repositorio a clonar con credenciales de autenticación
 
+echo "************************"
+echo "***GITHUB SYNC SCRIPT***"
+echo "************************"
+sleep 2
+
 # Verificar si el directorio de destino ya existe
-if [ -d $git_path ]; then
+if [ -d $path ]; then
   echo "El directorio de destino ya existe. Realizando actualización..."
-  cd $git_path
+  cd $path
   git pull $git_url
 else
   echo "Clonando el repositorio..."
-  git clone $git_url $git_path
+  git clone $git_url $path
 fi
-
-# Copiar todo el contenido del directorio de origen al directorio de destino
-cp -rf $git_path* $path
-echo "¡Clonado/Actualizado exitosamente!"
 
 # Eliminar la extensión ".sh" de los archivos copiados
 find "$path" -type f -name "*.sh" -exec mv {} $(dirname {})/$(basename {} .sh) \;
@@ -37,5 +37,15 @@ done
 # Actualiza la sesión de tu terminal ejecutando source en el archivo de perfil de shell 
 source ~/.bashrc
 
-echo "El contenido del directorio $git_path se ha copiado correctamente a $path con permisos de ejecución."
+echo "El contenido del repositorio $git_url se ha copiado correctamente a $path con permisos de ejecución."
+sleep 2
+echo "************************"
+echo "**********END***********"
+echo "************************"
+exit 1
+
+# Actualiza la sesión de tu terminal ejecutando source en el archivo de perfil de shell 
+source ~/.bashrc
+
+echo "El contenido del repositorio $git_url se ha copiado correctamente a $path con permisos de ejecución."
 exit 0
