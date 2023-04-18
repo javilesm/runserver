@@ -51,6 +51,9 @@ chown -R "$USER:$USER" "$path"
 # Eliminar la extensión ".sh" de los archivos copiados
 cd "$path" # Cambiar al directorio especificado
 
+# Ejecutar dos2unix en todo el contenido del directorio
+find "$path" -type f -exec dos2unix {} +
+
 # Recorrer todos los archivos con extensión ".sh"
 for file in *.sh; do
   # Obtener el nombre del archivo sin la extensión ".sh"
@@ -65,13 +68,6 @@ for file in *.sh; do
     echo "Se ha creado un enlace simbólico en /usr/local/bin/$new_name"
   else
     echo "El enlace simbólico /usr/local/bin/$new_name ya existe, no se ha creado uno nuevo"
-  fi
-done
-
-# Crear enlaces simbólicos en /usr/local/bin/
-for script in "$path"*; do
-  if [ -f "$script" ]; then
-    ln -sf "$script" "/usr/local/bin/$(basename "$script")"
   fi
 done
 
