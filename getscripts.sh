@@ -1,24 +1,42 @@
 #!/bin/bash
 # getscripts
 
-# Variables de autenticación de GitHub
-username="javilesm" # usuario GitHub
-token="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" # Token personal del usuario GitHub
-repository="scripts.git"
-path="/home/ubuntu/scripts/" # Directorio final
-git="https://$username:$token@github.com/$username/$repository"
+# Variables de GitHub
 API_URL="https://api.github.com" # API para autenticación en GitHub
+repository="scripts"
 
-echo "************************"
-echo "***GITHUB SYNC SCRIPT***"
-echo "************************"
-sleep 1
+# Obtener la ubicación del archivo git_credentials.txt
+CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CREDENTIALS_FILE="$CURRENT_PATH/git_credentials.txt"
+
+# variables del sistema
+path="$HOME/$repository/" # Directorio final
+SUB_SCRIPT="run_scripts" #Subscript a ejecutar
+
+# Inicio
+echo "**********GET SCRIPTS***********"
 
 # Verificar si el directorio de destino ya existe
+echo "Verificando si el directorio de destino ya existe"
 if [ -d "$path" ]; then
   echo "El directorio de destino ya existe. Realizando actualización..."
   cd "$path"
-    # Realiza la autenticación en la API de GitHub utilizando el token de acceso
+  # Leer credenciales desde archivo de texto
+  if [ -f $CREDENTIALS_FILE ]; then
+      source $CREDENTIALS_FILE
+  else
+      echo "El archivo git_credentials.txt no existe en la ubicación $CREDENTIALS_FILE. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
+      exit 1
+  fi
+  # Definir credenciales de acceso
+  username=$username
+  token=$token
+  # Mostrar credenciales de acceso
+  echo "Credenciales de acceso:"
+  echo "username: $username"
+  echo "token: ${token:0:3}*********"
+  git="https://$username:$token@github.com/$username/$repository.git"
+  # Realiza la autenticación en la API de GitHub utilizando el token de acceso
   response=$(curl -s -H "Authorization: token $token" $API_URL/$username)
 
   # Verifica si la autenticación fue exitosa
@@ -31,10 +49,11 @@ if [ -d "$path" ]; then
   fi
   
 else
+  # Crear directorio de destino y clonar repositorio
   echo "Creando directorio de destino"
   mkdir "$path" 
-  git clone "$git" "$path"
   echo "Clonando el repositorio..."
+  git clone "$git" "$path"
   if [ $? -eq 0 ]; then
     echo "El repositorio se ha clonado exitosamente en "$path""
   else
@@ -42,16 +61,18 @@ else
     exit 1
   fi
 fi
-
 echo "¡Clonado/Actualizado exitosamente!"
 
 # Actualiza la propiedad del directorio de destino
+echo "Actualizando la propiedad del directorio de destino"
 chown -R "$USER:$USER" "$path"
 
 # Eliminar la extensión ".sh" de los archivos copiados
+echo "Eliminando la extensión ".sh" de los archivos copiados"
 cd "$path" # Cambiar al directorio especificado
 
 # Ejecutar dos2unix en todo el contenido del directorio
+echo "Ejecutando dos2unix en todo el contenido del directorio"
 find "$path" -type f -exec dos2unix {} +
 
 # Recorrer todos los archivos con extensión ".sh"
@@ -61,6 +82,7 @@ for file in *.sh; do
   
   # Renombrar el archivo sin la extensión ".sh"
   mv "$file" "$new_name"
+  ls -a -lh "$path"
   
   # Crear enlace simbólico en /usr/local/bin/ si no existe
   if [ ! -L "/usr/local/bin/$new_name" ]; then
@@ -72,16 +94,18 @@ for file in *.sh; do
 done
 
 # Asignar permisos de ejecución a cada archivo copiado
+echo "Asignando permisos de ejecución a cada archivo copiado"
 find "$path" -type f -exec chmod +x {} +
 
-# Actualiza la sesión de tu terminal ejecutando source en el archivo de perfil de shell 
-source ~/.bashrc
+# Buscar el script "run_scripts.sh" y ejecutarlo
+echo "Buscando el script $SUB_SCRIPT y ejecutarlo"
+if [ -f "$SUB_SCRIPT" ]; then
+    echo "Ejecutando $SUB_SCRIPT ..."
+    sudo "$SUB_SCRIPT"
+else
+    echo "No se encontró el archivo $SUB_SCRIPT"
+fi
 
-echo "El contenido del repositorio "$git" se ha copiado correctamente a "$path" con permisos de ejecución."
-ls -a -lh $path
-sleep 2
-
-echo "************************"
+# Fin
 echo "**********END***********"
-echo "************************"
-exit 1
+exit 0
