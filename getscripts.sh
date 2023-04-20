@@ -13,55 +13,60 @@ CREDENTIALS_FILE="$CURRENT_PATH/git_credentials.txt"
 path="$HOME/$repository/" # Directorio final
 SUB_SCRIPT="run_scripts" #Subscript a ejecutar
 
-# Inicio
-echo "**********GET SCRIPTS***********"
+# Función para leer credenciales desde archivo de texto
+function read_credentials() {
+    if [ -f $CREDENTIALS_FILE ]; then
+        source $CREDENTIALS_FILE
+    else
+        echo "El archivo git_credentials.txt no existe en la ubicación $CREDENTIALS_FILE. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
+        exit 1
+    fi
+}
 
-# Verificar si el directorio de destino ya existe
-echo "Verificando si el directorio de destino ya existe"
-if [ -d "$path" ]; then
-  echo "El directorio de destino ya existe. Realizando actualización..."
-  cd "$path"
-  # Leer credenciales desde archivo de texto
-  if [ -f $CREDENTIALS_FILE ]; then
-      source $CREDENTIALS_FILE
-  else
-      echo "El archivo git_credentials.txt no existe en la ubicación $CREDENTIALS_FILE. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
-      exit 1
-  fi
-  # Definir credenciales de acceso
-  username=$username
-  token=$token
-  # Mostrar credenciales de acceso
-  echo "Credenciales de acceso:"
-  echo "username: $username"
-  echo "token: ${token:0:3}*********"
-  git="https://$username:$token@github.com/$username/$repository.git"
-  # Realiza la autenticación en la API de GitHub utilizando el token de acceso
-  response=$(curl -s -H "Authorization: token $token" $API_URL/$username)
+# Función para verificar si el directorio de destino ya existe
+function check_directory() {
+    if [ -d "$path" ]; then
+        echo "El directorio de destino ya existe. Realizando actualización..."
+        cd "$path"
+        read_credentials
+        username=$username
+        token=$token
+        echo "Credenciales de acceso:"
+        echo "username: $username"
+        echo "token: ${token:0:3}*********"
+        git="https://$username:$token@github.com/$username/$repository.git"
+        response=$(curl -s -H "Authorization: token $token" $API_URL/$username)
+        if [ $? -eq 0 ]; then
+            echo "Inicio de sesión exitoso en GitHub"
+            git pull "$git"
+        else
+            echo "Error al iniciar sesión en GitHub. Por favor, verifica tu token de acceso."
+            exit 1
+        fi
+    else
+        echo "Creando directorio de destino"
+        mkdir "$path" 
+        echo "Clonando el repositorio..."
+        git clone "$git" "$path"
+        if [ $? -eq 0 ]; then
+            echo "El repositorio se ha clonado exitosamente en "$path""
+        else
+            echo "Ha ocurrido un error al clonar el repositorio."
+            exit 1
+        fi
+    fi
+}
 
-  # Verifica si la autenticación fue exitosa
-  if [ $? -eq 0 ]; then
-    echo "Inicio de sesión exitoso en GitHub"
-    git pull "$git"
-  else
-    echo "Error al iniciar sesión en GitHub. Por favor, verifica tu token de acceso."
-    exit 1
-  fi
-  
-else
-  # Crear directorio de destino y clonar repositorio
-  echo "Creando directorio de destino"
-  mkdir "$path" 
-  echo "Clonando el repositorio..."
-  git clone "$git" "$path"
-  if [ $? -eq 0 ]; then
-    echo "El repositorio se ha clonado exitosamente en "$path""
-  else
-    echo "Ha ocurrido un error al clonar el repositorio."
-    exit 1
-  fi
-fi
-echo "¡Clonado/Actualizado exitosamente!"
+# Función principal
+function main() {
+    echo "**********GET SCRIPTS***********"
+    echo "Verificando si el directorio de destino ya existe"
+    check_directory
+    echo "¡Clonado/Actualizado exitosamente!"
+}
+
+# Llamar a la función principal
+main
 
 # Actualiza la propiedad del directorio de destino
 echo "Actualizando la propiedad del directorio de destino"
