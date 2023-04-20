@@ -5,13 +5,12 @@
 API_URL="https://api.github.com" # API para autenticación en GitHub
 repository="scripts"
 
-
 # Obtener la ubicación del archivo git_credentials.txt
 CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CREDENTIALS_FILE="$CURRENT_PATH/git_credentials.txt"
 
 # variables del sistema
-path="$CURRENT_PATH/$repository/" # Directorio final
+path="$CURRENT_PATH/$repository" # Directorio final
 SUB_SCRIPT="run_scripts" #Subscript a ejecutar
 
 # Función para leer credenciales desde archivo de texto
@@ -36,9 +35,9 @@ function check_directory() {
         echo "El directorio de destino ya existe. Realizando actualización..."
         cd "$path"
         response=$(curl -s -H "Authorization: token $token" $API_URL/$username)
-        echo "Inicio de sesión exitoso en GitHub"
+        echo "¡Inicio de sesión exitoso en GitHub!"
         if [ $? -eq 0 ]; then
-            echo "Actualizando $path desde $git"
+            echo "Actualizando $path desde $git..."
             cd "$path"
             git pull "$git"
         else
@@ -46,7 +45,7 @@ function check_directory() {
             exit 1
         fi
     else
-        echo "Creando directorio de destino"
+        echo "Creando directorio de destino..."
         mkdir "$path" 
         echo "Clonando el repositorio $git..."
         git clone "$git" "$path"
@@ -62,7 +61,7 @@ function check_directory() {
 # Función principal
 function main() {
     echo "**********GET SCRIPTS***********"
-    echo "Verificando si el directorio de destino ya existe"
+    echo "Verificando si el directorio de destino ya existe..."
     read_credentials
     check_directory "$username" "$token"
     echo "¡Clonado/Actualizado exitosamente!"
@@ -72,15 +71,21 @@ function main() {
 main
 
 # Actualiza la propiedad del directorio de destino
-echo "Actualizando la propiedad del directorio de destino"
+echo "Actualizando la propiedad del directorio de destino..."
 chown -R "$USER:$USER" "$path"
 
 # Eliminar la extensión ".sh" de los archivos copiados
-echo "Eliminando la extensión ".sh" de los archivos copiados"
+echo "Eliminando la extensión ".sh" de los archivos copiados..."
 cd "$path" # Cambiar al directorio especificado
 
+# Verificar si el paquete dos2unix está instalado
+if ! dpkg-query -W -f='${Status}' dos2unix | grep -q "install ok installed"; then
+    echo "El paquete dos2unix no está instalado. Por favor, instálelo y vuelva a ejecutar el script."
+    exit 1
+fi
+
 # Ejecutar dos2unix en todo el contenido del directorio
-echo "Ejecutando dos2unix en todo el contenido del directorio"
+echo "Ejecutando dos2unix en todo el contenido del directorio..."
 find "$path" -type f -exec dos2unix {} +
 
 # Recorrer todos los archivos con extensión ".sh"
@@ -102,16 +107,16 @@ for file in *.sh; do
 done
 
 # Asignar permisos de ejecución a cada archivo copiado
-echo "Asignando permisos de ejecución a cada archivo copiado"
+echo "Asignando permisos de ejecución a cada archivo copiado..."
 find "$path" -type f -exec chmod +x {} +
 
 # Buscar el script "run_scripts.sh" y ejecutarlo
-echo "Buscando el script $SUB_SCRIPT y ejecutarlo"
-if [ -f "$SUB_SCRIPT" ]; then
-    echo "Ejecutando $SUB_SCRIPT ..."
-    sudo "$SUB_SCRIPT"
+echo "Buscando el script $SUB_SCRIPT y ejecutando..."
+if [ -f "$path/$SUB_SCRIPT" ]; then
+    echo "Ejecutando $path/$SUB_SCRIPT ..."
+    sudo bash "$path/$SUB_SCRIPT"
 else
-    echo "No se encontró el archivo $SUB_SCRIPT"
+    echo "¡No se encontró el archivo $path/$SUB_SCRIPT!"
 fi
 
 # Fin
