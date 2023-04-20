@@ -5,18 +5,24 @@
 API_URL="https://api.github.com" # API para autenticación en GitHub
 repository="scripts"
 
+
 # Obtener la ubicación del archivo git_credentials.txt
 CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CREDENTIALS_FILE="$CURRENT_PATH/git_credentials.txt"
 
 # variables del sistema
-path="$HOME/$repository/" # Directorio final
+path="$CURRENT_PATH/$repository/" # Directorio final
 SUB_SCRIPT="run_scripts" #Subscript a ejecutar
 
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
     if [ -f $CREDENTIALS_FILE ]; then
         source $CREDENTIALS_FILE
+        username=$username
+        token=$token
+        echo "Credenciales de acceso:"
+        echo "username: $username"
+        echo "token: ${token:0:3}*********"
     else
         echo "El archivo git_credentials.txt no existe en la ubicación $CREDENTIALS_FILE. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
         exit 1
@@ -25,19 +31,15 @@ function read_credentials() {
 
 # Función para verificar si el directorio de destino ya existe
 function check_directory() {
+    git="https://$username:$token@github.com/$username/$repository.git"
     if [ -d "$path" ]; then
         echo "El directorio de destino ya existe. Realizando actualización..."
         cd "$path"
-        read_credentials
-        username=$username
-        token=$token
-        echo "Credenciales de acceso:"
-        echo "username: $username"
-        echo "token: ${token:0:3}*********"
-        git="https://$username:$token@github.com/$username/$repository.git"
         response=$(curl -s -H "Authorization: token $token" $API_URL/$username)
+        echo "Inicio de sesión exitoso en GitHub"
         if [ $? -eq 0 ]; then
-            echo "Inicio de sesión exitoso en GitHub"
+            echo "Actualizando $path desde $git"
+            cd "$path"
             git pull "$git"
         else
             echo "Error al iniciar sesión en GitHub. Por favor, verifica tu token de acceso."
@@ -46,7 +48,7 @@ function check_directory() {
     else
         echo "Creando directorio de destino"
         mkdir "$path" 
-        echo "Clonando el repositorio..."
+        echo "Clonando el repositorio $git..."
         git clone "$git" "$path"
         if [ $? -eq 0 ]; then
             echo "El repositorio se ha clonado exitosamente en "$path""
@@ -61,7 +63,8 @@ function check_directory() {
 function main() {
     echo "**********GET SCRIPTS***********"
     echo "Verificando si el directorio de destino ya existe"
-    check_directory
+    read_credentials
+    check_directory "$username" "$token"
     echo "¡Clonado/Actualizado exitosamente!"
 }
 
