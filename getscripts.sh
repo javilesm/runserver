@@ -1,18 +1,14 @@
 #!/bin/bash
-# getscripts
-
+# get_scripts.sh
 # Variables de GitHub
 API_URL="https://api.github.com" # API para autenticación en GitHub
 repository="scripts"
-
 # Obtener la ubicación del archivo git_credentials.txt
 CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CREDENTIALS_FILE="$CURRENT_PATH/git_credentials.txt"
-
 # variables del sistema
 path="$CURRENT_PATH/$repository" # Directorio final
-SUB_SCRIPT="run_scripts" #Subscript a ejecutar
-
+SUB_SCRIPT="run_scripts.sh" #Subscript a ejecutar
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
     if [ -f $CREDENTIALS_FILE ]; then
@@ -27,7 +23,6 @@ function read_credentials() {
         exit 1
     fi
 }
-
 # Función para verificar si el directorio de destino ya existe
 function check_directory() {
     git="https://$username:$token@github.com/$username/$repository.git"
@@ -57,7 +52,6 @@ function check_directory() {
         fi
     fi
 }
-
 # Función principal
 function main() {
     echo "**********GET SCRIPTS***********"
@@ -66,37 +60,26 @@ function main() {
     check_directory "$username" "$token"
     echo "¡Clonado/Actualizado exitosamente!"
 }
-
 # Llamar a la función principal
 main
-
 # Actualiza la propiedad del directorio de destino
 echo "Actualizando la propiedad del directorio de destino..."
 chown -R "$USER:$USER" "$path"
-
 # Eliminar la extensión ".sh" de los archivos copiados
 echo "Eliminando la extensión ".sh" de los archivos copiados..."
 cd "$path" # Cambiar al directorio especificado
-
 # Verificar si el paquete dos2unix está instalado
 if ! dpkg-query -W -f='${Status}' dos2unix | grep -q "install ok installed"; then
     echo "El paquete dos2unix no está instalado. Por favor, instálelo y vuelva a ejecutar el script."
     exit 1
 fi
-
-# Ejecutar dos2unix en todo el contenido del directorio
-echo "Ejecutando dos2unix en todo el contenido del directorio..."
-find "$path" -type f -exec dos2unix {} +
-
 # Recorrer todos los archivos con extensión ".sh"
 for file in *.sh; do
   # Obtener el nombre del archivo sin la extensión ".sh"
   new_name="${file%.sh}"
-  
   # Renombrar el archivo sin la extensión ".sh"
   mv "$file" "$new_name"
   ls -a -lh "$path"
-  
   # Crear enlace simbólico en /usr/local/bin/ si no existe
   if [ ! -L "/usr/local/bin/$new_name" ]; then
     ln -s "$path$new_name" "/usr/local/bin/$new_name"
@@ -105,11 +88,12 @@ for file in *.sh; do
     echo "El enlace simbólico /usr/local/bin/$new_name ya existe, no se ha creado uno nuevo"
   fi
 done
-
 # Asignar permisos de ejecución a cada archivo copiado
 echo "Asignando permisos de ejecución a cada archivo copiado..."
 find "$path" -type f -exec chmod +x {} +
-
+# Ejecutar dos2unix en todo el contenido del directorio
+echo "Ejecutando dos2unix en todo el contenido del directorio..."
+find "$path" -type f -exec dos2unix {} +
 # Buscar el script "run_scripts.sh" y ejecutarlo
 echo "Buscando el script $SUB_SCRIPT y ejecutando..."
 if [ -f "$path/$SUB_SCRIPT" ]; then
@@ -118,7 +102,6 @@ if [ -f "$path/$SUB_SCRIPT" ]; then
 else
     echo "¡No se encontró el archivo $path/$SUB_SCRIPT!"
 fi
-
 # Fin
 echo "**********END***********"
 exit 0
