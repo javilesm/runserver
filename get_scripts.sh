@@ -7,7 +7,12 @@ CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Obtener el di
 CREDENTIALS_FILE="git_credentials.txt"
 CREDENTIALS_PATH="$CURRENT_PATH/$CREDENTIALS_FILE" # Directorio del archivo git_credentials.txt
 path="$CURRENT_PATH/$repository" # Directorio final
-SUB_SCRIPT="run_scripts.sh" #Subscript a ejecutar
+#SUB_SCRIPT="run_scripts.sh" #Subscript a ejecutar
+# Vector de sub-scripts a ejecutar recursivamente
+scripts=(
+  "aws"
+  "jq"
+)
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
     echo "Leyendo cedenciales..."
@@ -79,6 +84,7 @@ check_dos2unix() {
         exit 1
     fi
 }
+
 # Función para eliminar la extensión ".sh" de los archivos copiados
 function remove_extension() {
     echo "Eliminando la extensión ".sh" de los archivos copiados..."
@@ -109,20 +115,21 @@ function update_terminal_session() {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
-# Función para ejecutar el script "run_scripts.sh"
-function run_subscript() {
-    echo "Buscando y ejecutando el script $SUB_SCRIPT..."
-    cd "$SCRIPTS_PATH" || exit
-    if [ -f "$SUB_SCRIPT" ]; then
-        sudo bash "$SUB_SCRIPT"
+# Función recursiva que ejecutará cada script en la lista de sub-scripts
+function run_scripts() {
+  echo "Ejecución de cada script en la lista de sub-scripts"
+  for script in "${scripts[@]}"; do
+    if [ -f "$path/$script" ] && [ -x "$path/$script" ]; then
+      echo "Ejecutando script: $script"
+      "$path/$script"
     else
-        echo "El archivo $SUB_SCRIPT no fue encontrado."
+      echo "Error: $script no existe o no tiene permiso de ejecución"
     fi
-    echo "El script $SUB_SCRIPT ha sido ejecutado."
+  done
 }
 # Función principal
 function main() {
-    echo "**********GET SCRIPTS***********"
+    echo "**********GET & RUN SCRIPTS***********"
     read_credentials || exit 1
     check_directory || exit 1
     update_dir_ownership || exit 1
@@ -131,7 +138,7 @@ function main() {
     assign_execution_permissions || exit 1
     create_symlinks || exit 1
     update_terminal_session || exit 1
-    run_subscript || exit 1
+    run_scripts || exit 1
     echo "**************END***************"
 }
 # Llamar a la función principal
