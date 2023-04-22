@@ -7,10 +7,9 @@ CURRENT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # Obtener el di
 CREDENTIALS_FILE="git_credentials.txt"
 CREDENTIALS_PATH="$CURRENT_PATH/$CREDENTIALS_FILE" # Directorio del archivo git_credentials.txt
 path="$CURRENT_PATH/$repository" # Directorio final
-#SUB_SCRIPT="run_scripts.sh" #Subscript a ejecutar
 # Vector de sub-scripts a ejecutar recursivamente
 scripts=(
-  "aws"
+  "aws_setup"
   "jq"
 )
 # Función para leer credenciales desde archivo de texto
@@ -115,9 +114,9 @@ function update_terminal_session() {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
-# Función recursiva que ejecutará cada script en la lista de sub-scripts
+# Función para ejecutar los scripts una vez
 function run_scripts() {
-  echo "Ejecución de cada script en la lista de sub-scripts"
+  echo "Ejecutando cada script en la lista de sub-scripts"
   for script in "${scripts[@]}"; do
     if [ -f "$path/$script" ] && [ -x "$path/$script" ]; then
       echo "Ejecutando script: $script"
