@@ -10,9 +10,18 @@ path="$CURRENT_PATH/$repository" # Directorio final
 UTILITIES_PATH="$path/utilities"
 # Vector de sub-scripts a ejecutar recursivamente
 scripts=(
-  "aws_install.sh"
-  "jq_install.sh"
-  "python_install.sh"
+  "add_repositories.sh"
+  "tree_install.sh"
+  "zip_install.sh"
+  "AWS/aws_install.sh"
+  "JQ/jq_install.sh"
+  "MySQL/mysql_install.sh"
+  "NEXTCLOUD/nextcloud_install.sh"
+  "NGINX/nginx_install.sh"
+  "NodeJS/nodejs_install.sh"
+  "PHP/php_install.sh"
+  "PostgreSQL/postgresql_install.sh"
+  "Python/python_install.sh"
 )
 # Función para leer credenciales desde archivo de texto
 function read_credentials () {
@@ -91,14 +100,6 @@ function check_dos2unix () {
         exit 1
     fi
 }
-# Función para eliminar la extensión ".sh" de los archivos copiados
-function remove_extension () {
-    echo "Eliminando la extensión ".sh" de los archivos copiados en $UTILITIES_PATH..."
-    cd "$UTILITIES_PATH" || { echo "Error al cambiar al directorio especificado"; exit 1; }
-    for file in *.sh; do
-        mv "$file" "${file%.sh}"
-    done
-}
 # Función para asignar permisos de ejecución a los archivos copiados
 function assign_execution_permissions () {
     echo "Asignando permisos de ejecución a los archivos copiados en $path..."
@@ -144,9 +145,15 @@ function update_terminal_session () {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
+# Función para actualizar el sistema
+function update_system() {
+  echo "Actualizando sistema...."
+  sudo apt-get update || { echo "Ha ocurrido un error al actualizar el sistema."; exit 1; }
+  echo "Sistema actualizado."
+}
 # Función para ejecutar los scripts una vez
 function run_scripts () {
-  echo "Ejecutando cada script en la lista de sub-scripts"
+  echo "Ejecutando cada script en la lista de sub-scripts..."
   for script in "${scripts[@]}"; do
     if [ -f "$path/$script" ] && [ -x "$path/$script" ]; then
       echo "Ejecutando script: $script"
@@ -156,20 +163,35 @@ function run_scripts () {
     fi
   done
 }
+# Función para actualizar paquetes
+function upgrade_system() {
+  echo "Actualizando paquetes...."
+  sudo apt-get upgrade || { echo "Ha ocurrido un error al actualizar los paquetes."; exit 1; }
+  echo "Paquetes actualizados."
+}
+# Función para limpiar sistema
+function clean_system() {
+  echo "Limpiando sistema..."
+  sudo apt-get clean || { echo "Ha ocurrido un error al limpiar el sistema."; exit 1; }
+  echo "Limpieza de sistema completada."
+}
 # Función principal
 function get_scripts () {
     echo "**********GET & RUN SCRIPTS***********"
-    read_credentials || exit 1
-    check_directory || exit 1
-    update_dir_ownership || exit 1
-    check_dos2unix || exit 1
-    #remove_extension || exit 1
-    assign_execution_permissions || exit 1
-    create_symlinks || exit 1
+    read_credentials
+    check_directory
+    update_dir_ownership
+    check_dos2unix
+    assign_execution_permissions
+    create_symlinks
     create_symlinks2
-    update_terminal_session || exit 1
-    run_scripts || exit 1
-    echo "**************END***************"
+    update_terminal_session
+    update_system
+    run_scripts
+    upgrade_system
+    clean_system
+    echo "**********GET & RUN SCRIPTS***********"
+    echo "**************ALL DONE***************"
 }
 # Llamar a la función principal
 get_scripts
