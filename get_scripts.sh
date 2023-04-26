@@ -26,21 +26,23 @@ scripts=(
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
   echo "Leyendo cedenciales..."
-  if [ -f "$CREDENTIALS_PATH" ]; then
-      source "$CREDENTIALS_PATH"
-      echo "Credenciales de acceso:"
-      echo "username: $username"
-      echo "token: ${token:0:3}*********"
-      export git="https://${username}:${token}@github.com/${username}/${repository}.git"
-  else
-      echo "El archivo $CREDENTIALS_FILE no existe en la ubicación $CREDENTIALS_PATH. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
-      exit 1
-  fi 
+if [ -f "$CREDENTIALS_PATH" ]; then
+    source "$CREDENTIALS_PATH"
+    username=${username%%[[:space:]]}  # Eliminar espacios en blanco finales
+    token=${token##+[[:space:]]}       # Eliminar espacios en blanco iniciales
+    export git="https://${username}:${token}@github.com/${username}/${repository}.git"
+    echo "Credenciales de acceso:"
+    echo "username: $username"
+    echo "token: ${token:0:3}*********"
+    echo "URL: $git"
+else
+    echo "El archivo $CREDENTIALS_FILE no existe en la ubicación $CREDENTIALS_PATH. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
+    exit 1
+fi 
 }
 # Función para verificar si el directorio de destino ya existe y clonar/actualizar Git
 function check_directory() {
-  
-  echo "Verificando si el directorio de destino ya existe..."
+    echo "Verificando si el directorio de destino ya existe..."
   if [ -d "$path" ]; then
       echo "El directorio de destino ya existe. Realizando actualización..."
       update_git
