@@ -178,8 +178,8 @@ function upgrade_system() {
 # Función para limpiar sistema
 function clean_system() {
   echo "Limpiando sistema..."
-  sudo apt-get clean || { echo "Ha ocurrido un error al limpiar el sistema."; exit 1; }
-  sudo apt autoremove
+  sudo apt-get clean -y
+  sudo apt autoremove -y
   echo "Limpieza de sistema completada."
 }
 # Función principal
