@@ -15,13 +15,14 @@ scripts=(
   "zip_install.sh"
   "AWS/aws_install.sh"
   "JQ/jq_install.sh"
-  "NEXTCLOUD/nextcloud_install.sh"
   "NGINX/nginx_install.sh"
   "NodeJS/nodejs_install.sh"
+  "PHP/php_install.sh"
+  "Python/python_install.sh"
   "MySQL/mysql_install.sh"
   "PostgreSQL/postgresql_install.sh"
-  "Python/python_install.sh"
-  "PHP/php_install.sh"
+  "NEXTCLOUD/nextcloud_install.sh"
+
 )
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
