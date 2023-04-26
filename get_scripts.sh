@@ -24,6 +24,16 @@ scripts=(
   "NEXTCLOUD/nextcloud_install.sh"
 
 )
+# Función para actualizar sistema
+function update_system() {
+  echo "Actualizando sistema..."
+  if sudo apt-get update; then
+    echo "Sistema actualizado."
+  else
+    echo "Ha ocurrido un error al actualizar el índice de paquetes."
+    exit 1
+  fi
+}
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
   echo "Leyendo cedenciales..."
@@ -151,12 +161,6 @@ function update_terminal_session () {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
-# Función para actualizar el sistema
-function update_system() {
-  echo "Actualizando sistema...."
-  sudo apt-get update || { echo "Ha ocurrido un error al actualizar el sistema."; exit 1; }
-  echo "Sistema actualizado."
-}
 # Función para ejecutar los scripts una vez
 function run_scripts () {
   echo "Ejecutando cada script en la lista de sub-scripts..."
@@ -172,19 +176,27 @@ function run_scripts () {
 # Función para actualizar paquetes
 function upgrade_system() {
   echo "Actualizando paquetes...."
-  sudo apt-get upgrade -y || { echo "Ha ocurrido un error al actualizar los paquetes."; exit 1; }
-  echo "Paquetes actualizados."
+  if sudo apt-get upgrade -y; then
+    echo "Paquetes actualizados."
+  else
+    echo "Ha ocurrido un error al actualizar los paquetes."
+    exit 1
+  fi
 }
 # Función para limpiar sistema
 function clean_system() {
   echo "Limpiando sistema..."
-  sudo apt-get clean -y
-  sudo apt autoremove -y
-  echo "Limpieza de sistema completada."
+  if sudo apt-get clean -y && sudo apt autoremove -y; then
+    echo "Limpieza de sistema completada."
+  else
+    echo "Ha ocurrido un error al limpiar el sistema."
+    exit 1
+  fi
 }
 # Función principal
 function get_scripts () {
     echo "**********GET & RUN SCRIPTS***********"
+    update_system
     read_credentials
     check_directory
     update_dir_ownership
@@ -193,7 +205,6 @@ function get_scripts () {
     create_symlinks
     create_symlinks2
     update_terminal_session
-    update_system
     run_scripts
     upgrade_system
     clean_system
