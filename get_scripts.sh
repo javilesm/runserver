@@ -24,39 +24,42 @@ scripts=(
   "Python/python_install.sh"
 )
 # Función para leer credenciales desde archivo de texto
-function read_credentials () {
-    echo "Leyendo cedenciales..."
-    if [ -f "$CREDENTIALS_PATH" ]; then
-        source "$CREDENTIALS_PATH"
-        echo "Credenciales de acceso:"
-        echo "username: $username"
-        echo "token: ${token:0:3}*********"
-        export git="https://$username:$token@github.com/$username/$repository.git"
-    else
-        echo "El archivo $CREDENTIALS_FILE no existe en la ubicación $CREDENTIALS_PATH. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
-        exit 1
-    fi 
+function read_credentials() {
+  echo "Leyendo cedenciales..."
+  if [ -f "$CREDENTIALS_PATH" ]; then
+      source "$CREDENTIALS_PATH"
+      echo "Credenciales de acceso:"
+      echo "username: $username"
+      echo "token: ${token:0:3}*********"
+      export git="https://${username}:${token}@github.com/${username}/${repository}.git"
+  else
+      echo "El archivo $CREDENTIALS_FILE no existe en la ubicación $CREDENTIALS_PATH. Por favor, cree el archivo con las variables username y token, y vuelva a intentarlo."
+      exit 1
+  fi 
 }
 # Función para verificar si el directorio de destino ya existe y clonar/actualizar Git
-function check_directory () {
-    echo "Verificando si el directorio de destino ya existe..."
-    if [ -d "$path" ]; then
-        echo "El directorio de destino ya existe. Realizando actualización..."
-        update_git
-    else
-        echo "El directorio de destino no existe. Clonando el repositorio..."
-        clone_repository
-    fi
+function check_directory() {
+  
+  echo "Verificando si el directorio de destino ya existe..."
+  if [ -d "$path" ]; then
+      echo "El directorio de destino ya existe. Realizando actualización..."
+      update_git
+  else
+      echo "El directorio de destino no existe."
+      clone_repository
+  fi
 }
 # Función para clonar repositorios
-function clone_repository () {
-    echo "Clonando $git en $path..."
-    if git clone "$git" "$path"; then
-        echo "¡Clonado exitoso!"
-    else
-        echo "Error al clonar el repositorio. Por favor, verifique su conexión a Internet e inténtelo de nuevo."
-        exit 1
-    fi
+function clone_repository() {
+  echo "Creando directorio $path..."
+  mkdir "$path"
+  echo "Clonando $git en $path..."
+  if git clone "$git" "$path"; then
+      echo "¡Clonado exitoso!"
+  else
+      echo "Error al clonar el repositorio."
+      exit 1
+  fi
 }
 # Función para actualizar repositorios
 function update_git () {
