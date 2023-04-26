@@ -171,13 +171,14 @@ function run_scripts () {
 # Función para actualizar paquetes
 function upgrade_system() {
   echo "Actualizando paquetes...."
-  sudo apt-get upgrade || { echo "Ha ocurrido un error al actualizar los paquetes."; exit 1; }
+  sudo apt-get upgrade -y || { echo "Ha ocurrido un error al actualizar los paquetes."; exit 1; }
   echo "Paquetes actualizados."
 }
 # Función para limpiar sistema
 function clean_system() {
   echo "Limpiando sistema..."
   sudo apt-get clean || { echo "Ha ocurrido un error al limpiar el sistema."; exit 1; }
+  sudo apt autoremove
   echo "Limpieza de sistema completada."
 }
 # Función principal
