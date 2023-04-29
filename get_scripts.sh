@@ -169,18 +169,26 @@ function validate_scripts() {
 # Función para ejecutar los scripts una vez
 function run_scripts () {
   echo "Ejecutando cada script en la lista de sub-scripts..."
+  local all_scripts_executed=true
   for script in "${scripts[@]}"; do
     echo "Compobando '$script' en: $SCRIPT_DIR/..."
     if [ -f "$SCRIPT_DIR/$script" ] && [ -x "$SCRIPT_DIR/$script" ]; then
       echo "Ejecutando script: $script"
       sudo bash "$SCRIPT_DIR/$script"
+      echo "El script: '$script' fue ejecutado."
     else
       echo "Error: $script no existe o no tiene permiso de ejecución"
+      all_scripts_executed=false
     fi
-    echo "El script: '$script' fue ejecutado."
-    echo "Todos los subscripts en '$SCRIPT_DIR' se han ejecutado correctamente."
-  return 0
   done
+  
+  if $all_scripts_executed; then
+    echo "Todos los subscripts en '$SCRIPT_DIR' se han ejecutado correctamente."
+    return 0
+  else
+    echo "Algunos subscripts en '$SCRIPT_DIR' no se pudieron ejecutar."
+    return 1
+  fi
 }
 # Función para actualizar paquetes
 function upgrade_system() {
