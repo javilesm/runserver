@@ -49,11 +49,11 @@ function check_directory() {
       update_git
   else
       echo "El directorio de destino no existe."
-      clone_REPOSITORY
+      clone_repository
   fi
 }
 # Función para clonar repositorios
-function clone_REPOSITORY() {
+function clone_repository() {
   echo "Creando directorio $SCRIPT_DIR..."
   mkdir "$SCRIPT_DIR"
   echo "Clonando $git en $SCRIPT_DIR..."
@@ -146,12 +146,6 @@ function update_terminal_session () {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
-# Función para actualizar el sistema
-function update_system() {
-  echo "Actualizando sistema...."
-  sudo apt-get update || { echo "Ha ocurrido un error al actualizar el sistema."; exit 1; }
-  echo "Sistema actualizado."
-}
 # Función para validar si cada script en el vector "scripts" existe y tiene permiso de ejecución
 function validate_scripts() {
   echo "Validando la existencia de cada script en la lista de sub-scripts..."
@@ -214,7 +208,6 @@ function get_scripts () {
     create_symlinks
     create_symlinks2
     update_terminal_session
-    update_system
     validate_scripts
     run_scripts
     upgrade_system
@@ -222,5 +215,7 @@ function get_scripts () {
     echo "**********GET & RUN SCRIPTS***********"
     echo "**************ALL DONE***************"
 }
+# Llamar a la función principal
+get_scripts
 # Llamar a la función principal
 get_scripts
