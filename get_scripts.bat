@@ -1,26 +1,22 @@
 @echo off
 
 rem Definir las variables para directorios locales
-set config_file=config
-set script_dir=%~dp0
-set script=get_scripts.sh
-set credentials=git_credentials.txt
-set local_file_path=%script_dir%%script%
-set credentials_path=%script_dir%%credentials%
-set Config_Path=%script_dir%%config_file%
-
+set CONFIG_FILE=config
+set LOCAL_DIR=%~dp0
+set CONFIG_PATH=%LOCAL_DIR%%CONFIG_FILE%
+set SCRIPT_FILE=get_scripts.sh
+set SCRIPT_PATH=%LOCAL_DIR%%SCRIPT_FILE%
+set CREDENTIALS_FILE=git_credentials.txt
+set CREDENTIALS_PATH=%LOCAL_DIR%%CREDENTIALS_FILE%
+ 
 rem Imprimir los valores de las variables
-cho config_file: %config_file%
-echo script_dir: %script_dir%
-echo script: %script%
-echo local_file_path: %local_file_path%
-echo credentials: %credentials%
-echo credentials_path: %credentials_path%
-echo Config_Path: %Config_Path%
+echo CONFIG_PATH: %CONFIG_PATH%
+echo SCRIPT_PATH: %SCRIPT_PATH%
+echo CREDENTIALS_PATH: %CREDENTIALS_PATH%
                   
 rem Leer los valores de las variables 'HostName', 'User', 'IdentityFile' desde el archivo 'config'
 echo Leyendo los valores de las variables 'HostName', 'User', 'IdentityFile' desde el archivo 'config'...
-for /f "usebackq tokens=1,2 delims= " %%i in ("%Config_Path%") do (
+for /f "usebackq tokens=1,2 delims= " %%i in ("%CONFIG_PATH%") do (
   if "%%i"=="HostName" set HostName=%%j                  
   if "%%i"=="User" set User=%%j                          
   if "%%i"=="IdentityFile" set IdentityFile=%%j          
@@ -37,18 +33,34 @@ echo HostName: %HostName%
 echo User: %User%                                        
 
 rem Defir las variables para directorios remotos    
-set server_file_path=/home/%User%/%script%  
-echo server_file_path: %server_file_path%
+set REMOTE_DIR=/home/%User%/
+echo REMOTE_DIR: %REMOTE_DIR%
 
 rem Copiar archivos locales a directorios remotos
-echo Copiando archivos locales a directorios remotosr...
-scp -v -i "%IdentityFile%" "%local_file_path%" "%User%@%HostName%:%server_file_path%"
-scp -v -i "%IdentityFile%" "%credentials_path%" "%User%@%HostName%:%server_file_path%"  
+echo Copiando archivo '%SCRIPT_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%SCRIPT_PATH%" "%User%@%HostName%:%REMOTE_DIR%"  
+echo Copiando archivo '%CREDENTIALS_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%CREDENTIALS_PATH%" "%User%@%HostName%:%REMOTE_DIR%"  
 
 if %errorlevel% equ 0 (
-  echo Copia de archivos locales a directorios remotos completada exitosamente.
+  echo Copia de archivo completada exitosamente.
   echo Ejecutando comandos en el servidor...
-  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo apt-get install dos2unix && sudo dos2unix /home/%User%/%script% && sudo chown $USER:$USER /home/%User%/%script% && sudo chmod +x /home/%User%/%script% && sudo bash /home/%User%/%script%"
+  echo Instalando dos2unix...
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo apt-get install dos2unix"
+  echo Ejecutando dos2unix en: %REMOTE_DIR%%SCRIPT_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo dos2unix %REMOTE_DIR%%SCRIPT_FILE%"
+  echo Ejecutando dos2unix en: %REMOTE_DIR%%CREDENTIALS_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo dos2unix %REMOTE_DIR%%CREDENTIALS_FILE%"
+  echo Cambiando propiedad al usuario de: %REMOTE_DIR%%SCRIPT_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo chown $USER:$USER %REMOTE_DIR%%SCRIPT_FILE%"
+  echo Cambiando propiedad al usuario de: %REMOTE_DIR%%CREDENTIALS_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo chown $USER:$USER %REMOTE_DIR%%CREDENTIALS_FILE%"
+  echo Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%"
+  echo Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%"
+  echo Ejecutando remotamente el script: %REMOTE_DIR%%SCRIPT_FILE%
+  ssh -i "%IdentityFile%" "%User%@%HostName%" "sudo bash %REMOTE_DIR%%SCRIPT_FILE%"
   echo Comandos en el servidor ejecutados exitosamente.
 ) else (
   echo Error durante la copia de archivo al servidor.
