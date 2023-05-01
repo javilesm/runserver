@@ -217,5 +217,3 @@ function get_scripts () {
 }
 # Llamar a la función principal
 get_scripts
-# Llamar a la función principal
-get_scripts
