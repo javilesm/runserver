@@ -8,6 +8,9 @@ CREDENTIALS_FILE="git_credentials.txt"
 CREDENTIALS_PATH="$CURRENT_PATH/$CREDENTIALS_FILE" # Directorio del archivo git_credentials.txt
 SCRIPT_DIR="$CURRENT_PATH/$REPOSITORY" # Directorio final
 UTILITIES_PATH="$SCRIPT_DIR/utilities"
+DATE=$(date +"%Y%m%d_%H%M%S") # Obtener la fecha y hora actual para el nombre del archivo de registro
+LOG_FILE="get_scripts_$DATE.log" # Nombre del archivo de registro
+LOG_PATH="$CURRENT_PATH/$LOG_FILE" # Ruta al archivo de registro
 # Vector de sub-scripts a ejecutar recursivamente
 scripts=(
     "update_system.sh"
@@ -24,6 +27,35 @@ scripts=(
     "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
 )
+# Función para crear un archivo de registro
+function create_log() {
+    # Verificar si el archivo de registro ya existe
+    if [ -f "$LOG_PATH" ]; then
+        echo "El archivo de registro '$LOG_FILE' ya existe."
+        return 1
+    fi
+    
+    # Intentar crear el archivo de registro
+    echo "Creando archivo de registro '$LOG_FILE'... "
+    sudo touch "$LOG_PATH"
+    if [ $? -ne 0 ]; then
+        echo "Error al crear el archivo de registro '$LOG_FILE'."
+        return 1
+    fi
+    
+    # Redirección de la salida estándar y de error al archivo de registro
+    exec &> >(tee -a "$LOG_PATH")
+    if [ $? -ne 0 ]; then
+        echo "Error al redirigir la salida estándar y de error al archivo de registro."
+        return 1
+    fi
+    
+    # Mostrar un mensaje de inicio
+    echo "Registro iniciado a las $(date '+%Y-%m-%d %H:%M:%S')."
+    
+    # Agregar una función de finalización para detener el logging
+    trap "stop_logging" EXIT
+}
 # Función para leer credenciales desde archivo de texto
 function read_credentials() {
   echo "Leyendo cedenciales..."
@@ -197,9 +229,20 @@ function clean_system() {
   sudo apt autoremove -y
   echo "Limpieza de sistema completada."
 }
+# Función para detener el logging y mostrar un mensaje de finalización
+function stop_logging() {
+    # Restaurar la redirección de la salida estándar y de error a la terminal
+    exec &> /dev/tty
+    if [ $? -ne 0 ]; then
+        echo "Error al restaurar la redirección de la salida estándar y de error a la terminal."
+    fi
+    # Mostrar un mensaje de finalización
+    echo "Registro finalizado a las $(date '+%Y-%m-%d %H:%M:%S')."
+}
 # Función principal
 function get_scripts () {
     echo "**********GET & RUN SCRIPTS***********"
+    create_log
     read_credentials
     check_directory
     update_dir_ownership
@@ -212,7 +255,7 @@ function get_scripts () {
     run_scripts
     upgrade_system
     clean_system
-    echo "**********GET & RUN SCRIPTS***********"
+    stop_logging
     echo "**************ALL DONE***************"
 }
 # Llamar a la función principal
