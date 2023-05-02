@@ -56,17 +56,25 @@ rem Defir las variables para directorios remotos
 set REMOTE_DIR=/home/%User%/
 echo REMOTE_DIR: %REMOTE_DIR%
 
-rem Copiar archivos locales a directorios remotos
-for %%F in ("%SCRIPT_FILE%","%CREDENTIALS_FILE%") do (
-    set "FILE=%%~F"
-    set "FILE_PATH=!%FILE%_PATH!"
-    echo Copiando archivo '!FILE!' al directorio '%REMOTE_DIR%'...
-    scp -v -i "%IdentityFile%" "!FILE_PATH!" "%User%@%HostName%:%REMOTE_DIR%"
+rem Verificar que los archivos locales existen
+if not exist "%SCRIPT_PATH%" (
+  echo El archivo de scripts '%SCRIPT_FILE%' no existe.
+  exit /b 1
 )
+
+if not exist "%CREDENTIALS_PATH%" (
+  echo El archivo de credenciales '%CREDENTIALS_FILE%' no existe.
+  exit /b 1
+)
+
+rem Copiar archivos locales a directorios remotos
+echo Copiando archivo '%SCRIPT_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%SCRIPT_PATH%" "%User%@%HostName%:%REMOTE_DIR%"  
+echo Copiando archivo '%CREDENTIALS_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%CREDENTIALS_PATH%" "%User%@%HostName%:%REMOTE_DIR%" 
 
 rem  Crear una función que tome como parámetro el comando SSH que se va a ejecutar y la cadena de texto que se va a imprimir
 set SSH_COMMAND=ssh -i "%IdentityFile%" "%User%@%HostName%"
-
 if %errorlevel% equ 0 (
   echo Copia de archivo completada exitosamente.
   echo Ejecutando comandos en el servidor...
