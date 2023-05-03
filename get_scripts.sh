@@ -13,8 +13,9 @@ LOG_FILE="get_scripts_$DATE.log" # Nombre del archivo de registro
 LOG_PATH="$CURRENT_PATH/$LOG_FILE" # Ruta al archivo de registro
 # Vector de sub-scripts a ejecutar recursivamente
 scripts=(
-    "update_system.sh"
+    "install_spc.sh"
     "add_repositories.sh"
+    "update_system.sh"
     "tree_install.sh"
     "zip_install.sh"
     "snap_install.sh"
@@ -28,6 +29,8 @@ scripts=(
     "MySQL/mysql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
+    "upgrade_system.sh"
+    "clean_system.sh"
 )
 # Función para crear un archivo de registro
 function create_log() {
@@ -216,26 +219,6 @@ function run_scripts () {
     return 1
   fi
 }
-# Función para actualizar paquetes
-function upgrade_system() {
-  echo "Actualizando paquetes...."
-  if sudo apt-get upgrade -y; then
-    echo "Paquetes actualizados."
-  else
-    echo "Error al actualizar paquetes."
-    exit 1
-  fi
-}
-# Función para limpiar sistema
-function clean_system() {
-  echo "Limpiando sistema..."
-  if sudo apt-get clean -y && sudo apt autoremove -y; then
-    echo "Limpieza de sistema completada."
-  else
-    echo "Error al limpiar el sistema."
-    exit 1
-  fi
-}
 # Función para detener el logging y mostrar un mensaje de finalización
 function stop_logging() {
     # Restaurar la redirección de la salida estándar y de error a la terminal
@@ -261,8 +244,6 @@ function get_scripts () {
     update_terminal_session
     validate_scripts
     run_scripts
-    upgrade_system
-    clean_system
     stop_logging
     echo "**************ALL DONE***************"
 }
