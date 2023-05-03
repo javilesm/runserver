@@ -17,12 +17,14 @@ scripts=(
     "add_repositories.sh"
     "tree_install.sh"
     "zip_install.sh"
+    "snap_install.sh"
     "AWS/aws_install.sh"
     "JQ/jq_install.sh"
     "NGINX/nginx_install.sh"
     "NodeJS/nodejs_install.sh"
     "PHP/php_install.sh"
     "Python/python_install.sh"
+    "install_cerbot.sh"
     "MySQL/mysql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
@@ -42,17 +44,15 @@ function create_log() {
         echo "Error al crear el archivo de registro '$LOG_FILE'."
         return 1
     fi
-    
+    echo "Archivo de registro '$LOG_FILE' creado exitosamente. "
     # Redirección de la salida estándar y de error al archivo de registro
     exec &> >(tee -a "$LOG_PATH")
     if [ $? -ne 0 ]; then
         echo "Error al redirigir la salida estándar y de error al archivo de registro."
         return 1
     fi
-    
     # Mostrar un mensaje de inicio
-    echo "Registro iniciado a las $(date '+%Y-%m-%d %H:%M:%S')."
-    
+    echo "Registro de eventos iniciado a las $(date '+%Y-%m-%d %H:%M:%S')."
     # Agregar una función de finalización para detener el logging
     trap "stop_logging" EXIT
 }
@@ -64,7 +64,7 @@ if [ -f "$CREDENTIALS_PATH" ]; then
     username=${username%%[[:space:]]}  # Eliminar espacios en blanco finales
     token=${token##+[[:space:]]}       # Eliminar espacios en blanco iniciales
     export git="https://${username}:${token}@github.com/${username}/${REPOSITORY}.git"
-    echo "Credenciales de acceso:"
+    echo "***Credenciales de acceso***"
     echo "username: $username"
     echo "token: ${token:0:3}*********"
     echo "URL: $git"
@@ -219,15 +219,22 @@ function run_scripts () {
 # Función para actualizar paquetes
 function upgrade_system() {
   echo "Actualizando paquetes...."
-  sudo apt-get upgrade -y || { echo "Ha ocurrido un error al actualizar los paquetes."; exit 1; }
-  echo "Paquetes actualizados."
+  if sudo apt-get upgrade -y; then
+    echo "Paquetes actualizados."
+  else
+    echo "Error al actualizar paquetes."
+    exit 1
+  fi
 }
 # Función para limpiar sistema
 function clean_system() {
   echo "Limpiando sistema..."
-  sudo apt-get clean -y
-  sudo apt autoremove -y
-  echo "Limpieza de sistema completada."
+  if sudo apt-get clean -y && sudo apt autoremove -y; then
+    echo "Limpieza de sistema completada."
+  else
+    echo "Error al limpiar el sistema."
+    exit 1
+  fi
 }
 # Función para detener el logging y mostrar un mensaje de finalización
 function stop_logging() {
@@ -237,7 +244,8 @@ function stop_logging() {
         echo "Error al restaurar la redirección de la salida estándar y de error a la terminal."
     fi
     # Mostrar un mensaje de finalización
-    echo "Registro finalizado a las $(date '+%Y-%m-%d %H:%M:%S')."
+    echo "Registro de eventos finalizado a las $(date '+%Y-%m-%d %H:%M:%S')."
+    echo "Ruta al registro de eventos: '$LOG_PATH'"
 }
 # Función principal
 function get_scripts () {
