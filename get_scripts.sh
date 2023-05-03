@@ -24,7 +24,7 @@ scripts=(
     "NodeJS/nodejs_install.sh"
     "PHP/php_install.sh"
     "Python/python_install.sh"
-    "install_cerbot.sh"
+    "certbot_install.sh"
     "MySQL/mysql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
