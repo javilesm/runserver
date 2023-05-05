@@ -19,6 +19,7 @@ scripts=(
     "tree_install.sh"
     "zip_install.sh"
     "snap_install.sh"
+    "clamav_install.sh"
     "AWS/aws_install.sh"
     "JQ/jq_install.sh"
     "NGINX/nginx_install.sh"
