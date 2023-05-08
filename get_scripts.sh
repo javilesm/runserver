@@ -27,6 +27,7 @@ scripts=(
     "PHP/php_install.sh"
     "Python/python_install.sh"
     "certbot_install.sh"
+    "SQLite/sqlite_install.sh"
     "MySQL/mysql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
