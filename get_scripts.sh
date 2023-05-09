@@ -29,9 +29,10 @@ scripts=(
     "certbot_install.sh"
     "SQLite/sqlite_install.sh"
     "MySQL/mysql_install.sh"
-    "NEXTCLOUD/nextcloud_install.sh"
     "PostgreSQL/postgresql_install.sh"
+    "NEXTCLOUD/nextcloud_install.sh"
     "Dovecot/dovecot_install.sh"
+    "Postfix/postfix_install.sh"
     "upgrade_system.sh"
     "clean_system.sh"
 )
