@@ -29,6 +29,7 @@ scripts=(
     "certbot_install.sh"
     "SQLite/sqlite_install.sh"
     "MySQL/mysql_install.sh"
+    "MariaDB/mariadb_install.sh"
     "PostgreSQL/postgresql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "Dovecot/dovecot_install.sh"
