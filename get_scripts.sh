@@ -33,8 +33,8 @@ scripts=(
     "PostgreSQL/postgresql_install.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "Dovecot/dovecot_install.sh"
-    "Postfix/postfix_accounts.sh"
     "Postfix/postfix_install.sh"
+    "Postfix/postfix_accounts.sh"
     "upgrade_system.sh"
     "clean_system.sh"
 )
