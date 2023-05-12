@@ -35,6 +35,7 @@ scripts=(
     "Dovecot/dovecot_install.sh"
     "Postfix/postfix_install.sh"
     "Postfix/postfix_accounts.sh"
+    "Postfix/postfix_vmailbox.sh"
     "upgrade_system.sh"
     "clean_system.sh"
 )
