@@ -23,7 +23,6 @@ scripts=(
     "PHP/php_install.sh"
     "Python/python_install.sh"
     "MySQL/mysql_config.sh"
-    "MariaDB/mariadb_config.sh"
     "PostgreSQL/postgresql_config.sh"
     "NEXTCLOUD/nextcloud_install.sh"
     "Dovecot/dovecot_install.sh"
