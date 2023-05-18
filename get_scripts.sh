@@ -25,10 +25,11 @@ scripts=(
     "MySQL/mysql_config.sh"
     "PostgreSQL/postgresql_config.sh"
     "NEXTCLOUD/nextcloud_install.sh"
-    "Dovecot/dovecot_install.sh"
     "Postfix/postfix_install.sh"
     "Postfix/postfix_accounts.sh"
     "Postfix/postfix_vmailbox.sh"
+    "Dovecot/generate_certs.sh"
+    "Dovecot/dovecot_config.sh"
     "upgrade_system.sh"
     "clean_system.sh"
 )
