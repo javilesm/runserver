@@ -15,6 +15,7 @@ LOG_PATH="$CURRENT_PATH/$LOG_FILE" # Ruta al archivo de registro
 scripts=(
     "add_repositories.sh"
     "update_system.sh"
+    "upgrade_system.sh"
     "packages_install.sh"
     "clamav_config.sh"
     "AWS/aws_install.sh"
