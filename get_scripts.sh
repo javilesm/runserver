@@ -29,7 +29,6 @@ scripts=(
     "LDAP/generate_certs.sh"
     #"NEXTCLOUD/nextcloud_install.sh"
     "Postfix/postfix_install.sh"
-    "Postfix/postfix_accounts.sh"
     "Dovecot/generate_certs.sh"
     "Dovecot/dovecot_config.sh"
     #"upgrade_system.sh"
