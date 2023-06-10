@@ -28,12 +28,13 @@ scripts=(
     "clean_system.sh"
 )
 # Función para solicitar un reinicio y continuar automáticamente después del reinicio
+# Función para solicitar un reinicio y continuar automáticamente después del reinicio
 function reboot_and_continue() {
     echo "Se requiere un reinicio del sistema. El script se reanudará automáticamente después del reinicio."
-    echo "Presione 'Enter' para reiniciar el sistema."
-    read -r
+    echo "Reiniciando el sistema..."
     sudo shutdown -r now
 }
+
 
 # Función para guardar el estado actual en el archivo de estado
 function save_state() {
