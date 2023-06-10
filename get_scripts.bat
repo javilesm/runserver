@@ -95,9 +95,8 @@ if %errorlevel% equ 0 (
   call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando propiedad al usuario de: %REMOTE_DIR%%CREDENTIALS_FILE%"
   call :execute_command "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%"
   call :execute_command "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%"
-
+  call :execute_command "sudo bash %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando script: %REMOTE_DIR%%SCRIPT_FILE%"
   
-
   echo Comandos en el servidor ejecutados exitosamente.
 ) else (
   echo Error durante la copia de archivo al servidor.
