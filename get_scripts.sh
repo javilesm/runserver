@@ -11,28 +11,8 @@ UTILITIES_PATH="$SCRIPT_DIR/utilities"
 DATE=$(date +"%Y%m%d_%H%M%S") # Obtener la fecha y hora actual para el nombre del archivo de registro
 LOG_FILE="get_scripts_$DATE.log" # Nombre del archivo de registro
 LOG_PATH="$CURRENT_PATH/$LOG_FILE" # Ruta al archivo de registro
-# Vector de sub-scripts a ejecutar recursivamente
-scripts=(
-    "add_repositories.sh"
-    "update_system.sh"
-    "packages_install.sh"
-    "clamav_config.sh"
-    "AWS/aws_install.sh"
-    "NodeJS/nodejs_install.sh"
-    "PHP/php_install.sh"
-    "NGINX/nginx_install.sh"
-    "NEXTCLOUD/nextcloud_install.sh"
-    "Python/python_install.sh"
-    "MySQL/mysql_config.sh"
-    "PostgreSQL/postgresql_config.sh"
-    "Postfix/postfix_install.sh"
-    "Dovecot/generate_certs.sh"
-    "Dovecot/dovecot_config.sh"
-    "LDAP/openldap_config.sh"
-    "LDAP/generate_certs.sh"
-    "upgrade_system.sh"
-    "clean_system.sh"
-)
+RUN_SCRIPT_FILE="run_scripts.sh"
+RUN_SCRIPT_PATH="$CURRENT_PATH/$RUN_SCRIPT_FILE"
 # Función para crear un archivo de registro
 function create_log() {
     # Verificar si el archivo de registro ya existe
@@ -82,7 +62,7 @@ function check_directory() {
     echo "Verificando si el directorio de destino ya existe..."
   if [ -d "$SCRIPT_DIR" ]; then
       echo "El directorio de destino ya existe. Realizando actualización..."
-      update_git
+      #update_git
   else
       echo "El directorio de destino no existe."
       clone_repository
@@ -97,7 +77,7 @@ function clone_repository() {
       echo "¡Clonado exitoso!"
   else
       echo "Error al clonar el repositorio."
-      exit 1
+      exit 0
   fi
 }
 # Función para actualizar repositorios
@@ -182,43 +162,26 @@ function update_terminal_session () {
     echo "Actualizando la sesión de la terminal..."
     source ~/.bashrc
 }
-# Función para validar si cada script en el vector "scripts" existe y tiene permiso de ejecución
-function validate_scripts() {
-  echo "Validando la existencia de cada script en la lista de sub-scripts..."
-  for script in "${scripts[@]}"; do
-    echo "Compobando '$script' en: $SCRIPT_DIR/..."
-    if [ ! -f "$SCRIPT_DIR/$script" ] || [ ! -x "$SCRIPT_DIR/$script" ]; then
-      echo "Error: $script no existe o no tiene permiso de ejecución"
-      exit 1
-    fi
-    echo "El script '$script' existe en: $SCRIPT_DIR/"
-  done
-  echo "Todos los sub-scripts en '$SCRIPT_DIR' existen y tienen permiso de ejecución."
-  return 0
-}
-# Función para ejecutar los scripts una vez
-function run_scripts () {
-  echo "Ejecutando cada script en la lista de sub-scripts..."
-  local all_scripts_executed=true
-  for script in "${scripts[@]}"; do
-    echo "Compobando '$script' en: $SCRIPT_DIR/..."
-    if [ -f "$SCRIPT_DIR/$script" ] && [ -x "$SCRIPT_DIR/$script" ]; then
-      echo "Ejecutando script: $script"
-      sudo bash "$SCRIPT_DIR/$script"
-      echo "El script: '$script' fue ejecutado."
-    else
-      echo "Error: $script no existe o no tiene permiso de ejecución"
-      all_scripts_executed=false
-    fi
-  done
-  
-  if $all_scripts_executed; then
-    echo "Todos los subscripts en '$SCRIPT_DIR' se han ejecutado correctamente."
-    return 0
-  else
-    echo "Algunos subscripts en '$SCRIPT_DIR' no se pudieron ejecutar."
-    return 1
+# Función para verificar si el archivo de configuración existe
+function validate_script() {
+  echo "Verificando si el archivo de configuración existe..."
+  if [ ! -f "$RUN_SCRIPT_PATH" ]; then
+    echo "ERROR: El archivo '$RUN_SCRIPT_FILE' no se puede encontrar en la ruta '$RUN_SCRIPT_PATH'."
+    exit 1
   fi
+  echo "El archivo '$RUN_SCRIPT_FILE' existe."
+}
+# Función para ejecutar el configurador de Postfix
+function run_script() {
+  echo "Ejecutar el configurador '$RUN_SCRIPT_FILE'..."
+    # Intentar ejecutar el archivo de configuración de Postfix
+  if sudo bash "$RUN_SCRIPT_PATH"; then
+    echo "El archivo '$RUN_SCRIPT_FILE' se ha ejecutado correctamente."
+  else
+    echo "ERROR: No se pudo ejecutar el archivo '$RUN_SCRIPT_FILE'."
+    exit 1
+  fi
+  echo "Configurador '$RUN_SCRIPT_FILE' ejecutado."
 }
 # Función para detener el logging y mostrar un mensaje de finalización
 function stop_logging() {
@@ -233,7 +196,7 @@ function stop_logging() {
 }
 # Función principal
 function get_scripts () {
-    echo "**********GET & RUN SCRIPTS***********"
+    echo "**********GET SCRIPTS***********"
     create_log
     read_credentials
     check_directory
@@ -243,8 +206,8 @@ function get_scripts () {
     create_symlinks
     create_symlinks2
     update_terminal_session
-    validate_scripts
-    run_scripts
+    validate_script
+    run_script
     stop_logging
     echo "**************ALL DONE***************"
 }
