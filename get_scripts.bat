@@ -6,6 +6,8 @@ set LOCAL_DIR=%~dp0
 set CONFIG_PATH=%LOCAL_DIR%%CONFIG_FILE%
 set SCRIPT_FILE=get_scripts.sh
 set SCRIPT_PATH=%LOCAL_DIR%%SCRIPT_FILE%
+set RUN_SCRIPT_FILE=run_scripts.sh
+set RUN_SCRIPT_PATH=%LOCAL_DIR%%RUN_SCRIPT_FILE%
 set CREDENTIALS_FILE=git_credentials.txt
 set CREDENTIALS_PATH=%LOCAL_DIR%%CREDENTIALS_FILE%
  
@@ -61,15 +63,20 @@ if not exist "%SCRIPT_PATH%" (
   echo El archivo de scripts '%SCRIPT_FILE%' no existe.
   exit /b 1
 )
+echo Copiando archivo '%SCRIPT_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%SCRIPT_PATH%" "%User%@%HostName%:%REMOTE_DIR%"  
+
+if not exist "%RUN_SCRIPT_PATH%" (
+  echo El archivo de scripts '%RUN_SCRIPT_FILE%' no existe.
+  exit /b 1
+)
+echo Copiando archivo '%RUN_SCRIPT_FILE%' al directorio '%REMOTE_DIR%'...
+scp -v -i "%IdentityFile%" "%RUN_SCRIPT_PATH%" "%User%@%HostName%:%REMOTE_DIR%" 
 
 if not exist "%CREDENTIALS_PATH%" (
   echo El archivo de credenciales '%CREDENTIALS_FILE%' no existe.
   exit /b 1
 )
-
-rem Copiar archivos locales a directorios remotos
-echo Copiando archivo '%SCRIPT_FILE%' al directorio '%REMOTE_DIR%'...
-scp -v -i "%IdentityFile%" "%SCRIPT_PATH%" "%User%@%HostName%:%REMOTE_DIR%"  
 echo Copiando archivo '%CREDENTIALS_FILE%' al directorio '%REMOTE_DIR%'...
 scp -v -i "%IdentityFile%" "%CREDENTIALS_PATH%" "%User%@%HostName%:%REMOTE_DIR%" 
 
@@ -82,12 +89,14 @@ if %errorlevel% equ 0 (
   call :execute_command "sudo apt-get update -y" "Actualizando paquetes..."
   call :execute_command "sudo apt-get install dos2unix" "Instalando dos2unix..."
   call :execute_command "sudo dos2unix %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%SCRIPT_FILE%"
+  call :execute_command "sudo dos2unix %REMOTE_DIR%%RUN_SCRIPT_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%RUN_SCRIPT_FILE%"
   call :execute_command "sudo dos2unix %REMOTE_DIR%%CREDENTIALS_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%CREDENTIALS_FILE%"
   call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando propiedad al usuario de: %REMOTE_DIR%%SCRIPT_FILE%"
   call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando propiedad al usuario de: %REMOTE_DIR%%CREDENTIALS_FILE%"
   call :execute_command "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%"
   call :execute_command "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%"
-  call :execute_command "sudo bash %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando remotamente el script: %REMOTE_DIR%%SCRIPT_FILE%"
+
+  
 
   echo Comandos en el servidor ejecutados exitosamente.
 ) else (
