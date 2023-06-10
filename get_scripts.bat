@@ -85,7 +85,7 @@ set SSH_COMMAND=ssh -i "%IdentityFile%" "%User%@%HostName%"
 if %errorlevel% equ 0 (
   echo Copia de archivo completada exitosamente.
   echo Ejecutando comandos en el servidor...
-  
+  call :execute_command "sudo rm -r %REMOTE_DIR%scripts" "Eliminando el directorio scripts..."
   call :execute_command "sudo apt-get update -y" "Actualizando paquetes..."
   call :execute_command "sudo apt-get install dos2unix" "Instalando dos2unix..."
   call :execute_command "sudo dos2unix %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%SCRIPT_FILE%"
@@ -96,7 +96,7 @@ if %errorlevel% equ 0 (
   call :execute_command "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%"
   call :execute_command "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%"
   call :execute_command "sudo bash %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando script: %REMOTE_DIR%%SCRIPT_FILE%"
-  
+
   echo Comandos en el servidor ejecutados exitosamente.
 ) else (
   echo Error durante la copia de archivo al servidor.
