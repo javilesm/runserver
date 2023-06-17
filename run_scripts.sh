@@ -86,15 +86,32 @@ function run_script() {
         save_state
 
         # Solicitar reinicio y continuar después de cada script
-        reboot_and_continue
+        #reboot_and_continue
     done
 
     # Eliminar el archivo de estado al finalizar todos los scripts
-    rm "$STATE_FILE"
+    #rm "$STATE_FILE"
+}
+# Función para agregar una entrada al crontab para automatizar la ejecución del script tras cada reinicio
+function add_cron_entry() {
+  local cron_entry="@reboot bash $CURRENT_PATH/scripts/packages_install.sh"
+  
+  # agregar una entrada al crontab para automatizar la ejecución del script tras cada reinicio
+  echo "Agregando una entrada al crontab para automatizar la ejecución del script tras cada reinicio..."
+  
+  # Verificar si la entrada ya existe en el crontab
+  if sudo crontab -l | grep -q "$cron_entry"; then
+    echo "La entrada ya existe en el crontab. No se realizará ninguna modificación."
+  else
+    # Agregar la entrada al crontab utilizando echo y redirección de entrada
+    echo "$(sudo crontab -l 2>/dev/null; echo "$cron_entry")" | sudo crontab -
+    echo "Se ha agregado la entrada al crontab para ejecutar el script tras cada reinicio."
+  fi
 }
 # Función principal
 function run_scripts() {
     echo "**********RUN SCRIPTS***********"
+    add_cron_entry
     validate_script
     run_script
     echo "**************ALL DONE***************"
