@@ -17,6 +17,7 @@ scripts=(
   "AWS/create_user_groups.sh"
   "AWS/create_role.sh"
   "AWS/create_s3_buckets.sh"
+  "AWS/generate_kms_key.sh"
   "AWS/s3_config.sh"
   "Python/python_install.sh"
   "PHP/php_install.sh"
