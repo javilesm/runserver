@@ -13,6 +13,7 @@ LOG_PATH="$CURRENT_DIR/$LOG_FILE" # Ruta al archivo de registro
 scripts=(
   "add_repositories.sh"
   "packages_install.sh"
+  "AWS/credentials_updater.sh"
   "AWS/aws_config.sh"
   "AWS/create_user_groups.sh"
   "AWS/create_role.sh"
