@@ -11,24 +11,30 @@ LOG_FILE="run_scripts_$DATE.log" # Nombre del archivo de registro
 LOG_PATH="$CURRENT_DIR/$LOG_FILE" # Ruta al archivo de registro
 # Vector de sub-scripts a ejecutar recursivamente
 scripts=(
-    "add_repositories.sh"
-    "packages_install.sh"
-    "Python/python_install.sh"
-    "PHP/php_install.sh"
-    "MySQL/mysql_config.sh"
-    "PostgreSQL/postgresql_config.sh"
-    "NGINX/nginx_config.sh"
-    "NEXTCLOUD/nextcloud_install.sh"
-    "Postfix/postfix_install.sh"
-    "configure_postfixadmin.sh"
-    "Dovecot/generate_certs.sh"
-    "Dovecot/dovecot_config.sh"
-    "LDAP/openldap_config.sh"
-    "LDAP/generate_certs.sh"
-    "clamav_config.sh"
-    "AWS/aws_install.sh"
-    "upgrade_system.sh"
-    "clean_system.sh"
+  "add_repositories.sh"
+  "packages_install.sh"
+  "AWS/aws_config.sh"
+  "AWS/create_user_groups.sh"
+  "AWS/create_role.sh"
+  "AWS/create_s3_buckets.sh"
+  "AWS/s3_config.sh"
+  "Python/python_install.sh"
+  "PHP/php_install.sh"
+  "MySQL/mysql_config.sh"
+  "PostgreSQL/postgresql_config.sh"
+  "NGINX/nginx_generate_certs.sh"
+  "NGINX/nginx_config.sh"
+  "NEXTCLOUD/nextcloud_install.sh"
+  "MySQL/phpmyadmin_install.sh"
+  "Postfix/postfix_install.sh"
+  "Postfix/configure_postfixadmin.sh"
+  "Dovecot/generate_certs.sh"
+  "Dovecot/dovecot_config.sh"
+  "LDAP/openldap_config.sh"
+  "LDAP/generate_certs.sh"
+  "clamav_config.sh"
+  "upgrade_system.sh"
+  "clean_system.sh"
 )
 # Función para crear un archivo de registro
 function create_log() {
@@ -130,7 +136,7 @@ function run_script() {
         save_state
 
         # Solicitar reinicio y continuar después de cada script
-        #sudo shutdown -r now
+        sudo shutdown -r now
     done
 
     # Eliminar el archivo de estado al finalizar todos los scripts
