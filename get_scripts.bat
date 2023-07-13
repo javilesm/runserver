@@ -10,6 +10,8 @@ set RUN_SCRIPT_FILE=run_scripts.sh
 set RUN_SCRIPT_PATH=%LOCAL_DIR%%RUN_SCRIPT_FILE%
 set CREDENTIALS_FILE=git_credentials.txt
 set CREDENTIALS_PATH=%LOCAL_DIR%%CREDENTIALS_FILE%
+set TYPER_SCRIPT_FILE=typer.sh
+set TYPER_SCRIPT_PATH=%LOCAL_DIR%%TYPER_SCRIPT_FILE%
  
 rem Imprimir los valores de las variables
 echo CONFIG_PATH: %CONFIG_PATH%
@@ -81,23 +83,38 @@ echo Copiando archivo '%CREDENTIALS_FILE%' al directorio '%REMOTE_DIR%'...
 scp -v -i "%IdentityFile%" "%CREDENTIALS_PATH%" "%User%@%HostName%:%REMOTE_DIR%" 
 
 rem  Crear una función que tome como parámetro el comando SSH que se va a ejecutar y la cadena de texto que se va a imprimir
+echo Crear una función que tome como parámetro el comando SSH que se va a ejecutar y la cadena de texto que se va a imprimir
 set SSH_COMMAND=ssh -i "%IdentityFile%" "%User%@%HostName%"
 if %errorlevel% equ 0 (
   echo Copia de archivo completada exitosamente.
   echo Ejecutando comandos en el servidor...
-  call :execute_command "sudo rm -r %REMOTE_DIR%scripts" "Eliminando el directorio scripts..."
-  call :execute_command "sudo apt-get update -y" "Actualizando paquetes..."
-  call :execute_command "sudo apt-get install dos2unix" "Instalando dos2unix..."
-  call :execute_command "sudo dos2unix %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%SCRIPT_FILE%"
-  call :execute_command "sudo dos2unix %REMOTE_DIR%%RUN_SCRIPT_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%RUN_SCRIPT_FILE%"
-  call :execute_command "sudo dos2unix %REMOTE_DIR%%CREDENTIALS_FILE%" "Ejecutando dos2unix en: %REMOTE_DIR%%CREDENTIALS_FILE%"
-  call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando propiedad al usuario de: %REMOTE_DIR%%SCRIPT_FILE%"
-  call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando propiedad al usuario de: %REMOTE_DIR%%CREDENTIALS_FILE%"
-  call :execute_command "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%" "Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%"
-  call :execute_command "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%" "Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%"
-  call :execute_command "sudo bash %REMOTE_DIR%%SCRIPT_FILE%" "Ejecutando script: %REMOTE_DIR%%SCRIPT_FILE%"
+  echo Eliminando el directorio scripts...
+  call :execute_command "sudo rm -r %REMOTE_DIR%scripts" 
+  echo Actualizando paquetes...
+  call :execute_command "sudo apt-get update -y" 
+  echo Instalando dos2unix...
+  call :execute_command "sudo apt-get install dos2unix" 
+  echo Ejecutando dos2unix en: %REMOTE_DIR%%SCRIPT_FILE%
+  call :execute_command "sudo dos2unix %REMOTE_DIR%%SCRIPT_FILE%" 
+  echo Ejecutando dos2unix en: %REMOTE_DIR%%RUN_SCRIPT_FILE%
+  call :execute_command "sudo dos2unix %REMOTE_DIR%%RUN_SCRIPT_FILE%" 
+  echo Ejecutando dos2unix en: %REMOTE_DIR%%CREDENTIALS_FILE%
+  call :execute_command "sudo dos2unix %REMOTE_DIR%%CREDENTIALS_FILE%" 
+  echo Cambiando propiedad al usuario de: %REMOTE_DIR%%SCRIPT_FILE%
+  call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%SCRIPT_FILE%" 
+  echo Cambiando propiedad al usuario de: %REMOTE_DIR%%CREDENTIALS_FILE%
+  call :execute_command "sudo chown $USER:$USER %REMOTE_DIR%%CREDENTIALS_FILE%" 
+  echo Cambiando permisos en: %REMOTE_DIR%%SCRIPT_FILE%
+  call :execute_command "sudo chmod +x %REMOTE_DIR%%SCRIPT_FILE%" 
+  echo Cambiando permisos en: %REMOTE_DIR%%RUN_SCRIPT_FILE%
+  call :execute_command "sudo chmod +x %REMOTE_DIR%%RUN_SCRIPT_FILE%" 
+  echo Cambiando permisos en: %REMOTE_DIR%%CREDENTIALS_FILE%
+  call :execute_command "sudo chmod 600 %REMOTE_DIR%%CREDENTIALS_FILE%" 
+  echo Ejecutando script: %REMOTE_DIR%%SCRIPT_FILE%
+  call :execute_command "sudo bash %REMOTE_DIR%%SCRIPT_FILE%" 
 
   echo Comandos en el servidor ejecutados exitosamente.
+
 ) else (
   echo Error durante la copia de archivo al servidor.
 )
@@ -110,3 +127,38 @@ goto :end
   goto :eof
 
 :end
+
+echo Esperando antes de intentar reconectar al servidor...
+timeout /t 60
+echo Reconectando al servidor...
+
+set MAX_RETRIES=9999
+set RETRIES=0
+set CONNECTED=false
+
+:reconnect
+if %CONNECTED%==true goto :end_reconnect
+
+set /a RETRIES+=1
+echo Intento de reconexión %RETRIES% de %MAX_RETRIES%...
+
+if %errorlevel% equ 0 (
+  set CONNECTED=true
+  echo Reconexión exitosa.
+  echo Ejecutando script: %REMOTE_DIR%%RUN_SCRIPT_FILE%
+  call :execute_command "sudo bash %REMOTE_DIR%%RUN_SCRIPT_FILE%"
+
+) else (
+  echo Error en la reconexión.
+)
+
+if %RETRIES% lss %MAX_RETRIES% (
+  echo Esperando 10 segundos antes de intentar nuevamente...
+  timeout /t 10
+  goto :reconnect
+) else (
+  echo No se pudo establecer conexión con el servidor después de %MAX_RETRIES% intentos.
+)
+
+:end_reconnect
+
