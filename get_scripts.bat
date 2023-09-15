@@ -1,5 +1,5 @@
 @echo off
-
+echo Script para obtener scripts
 rem Definir las variables para directorios locales
 set CONFIG_FILE=config
 set LOCAL_DIR=%~dp0
