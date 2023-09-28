@@ -207,7 +207,7 @@ function get_scripts () {
     create_symlinks2
     update_terminal_session
     validate_script
-    run_script
+    #run_script
     stop_logging
     echo "**************ALL DONE***************"
 }
