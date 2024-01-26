@@ -85,7 +85,7 @@ function add_cron_entry() {
 function reboot_and_continue() {
   echo "Se requiere un reinicio del sistema. El script se reanudará automáticamente después del reinicio."
   echo "Reiniciando el sistema..."
-  sudo shutdown -r now
+  #sudo shutdown -r now
 }
 
 # Función para guardar el estado actual en el archivo de estado
@@ -138,7 +138,7 @@ function run_script() {
         save_state
 
         # Solicitar reinicio y continuar después de cada script
-        sudo shutdown -r now
+        # sudo shutdown -r now
     done
 
     # Eliminar el archivo de estado al finalizar todos los scripts
